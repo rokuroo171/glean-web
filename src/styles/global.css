@@ -1,0 +1,34 @@
+:root {
+  --deep-sky: #0b0f19;
+  --horizon: #1b2636;
+  --starlight: #e9eef6;
+  --moonlit: #8b97ab;
+  --star-gold: #e8c9a0;
+  --trail-blue: #5a9bc4;
+
+  --font-serif: 'Newsreader', 'Georgia', serif;
+  --font-sans: 'Work Sans', 'Helvetica Neue', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--deep-sky);
+  color: var(--starlight);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
