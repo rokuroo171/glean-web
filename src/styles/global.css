@@ -24,7 +24,366 @@ body {
   color: var(--starlight);
   font-family: var(--font-sans);
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.65;
+}
+
+a {
+  color: var(--trail-blue);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--starlight);
+}
+
+code {
+  font-family: var(--font-sans);
+  font-size: 0.9em;
+  color: var(--star-gold);
+}
+
+:focus-visible {
+  outline: 2px solid var(--trail-blue);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.sky-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.constellation-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.constellation-base {
+  fill: none;
+  stroke: var(--trail-blue);
+  stroke-width: 1;
+  opacity: 0.14;
+}
+
+.constellation-draw {
+  fill: none;
+  stroke: var(--trail-blue);
+  stroke-width: 1.2;
+  opacity: 0.75;
+}
+
+.vertex {
+  fill: var(--deep-sky);
+  stroke: var(--trail-blue);
+  stroke-width: 1.2;
+  opacity: 0.45;
+}
+
+.vertex.reached {
+  fill: var(--trail-blue);
+  opacity: 0.9;
+}
+
+.page {
+  position: relative;
+  z-index: 2;
+}
+
+/* Sections: one narrow block per vertex, alternating sides */
+
+.hero {
+  min-height: 100vh;
+  max-width: 62ch;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.block {
+  max-width: 62ch;
+  width: 100%;
+  padding: 0 24px;
+  margin-bottom: 42vh;
+}
+
+.block-left {
+  margin-right: auto;
+  margin-left: 8vw;
+}
+
+.block-right {
+  margin-left: auto;
+  margin-right: 8vw;
+}
+
+.block-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  line-height: 1.15;
+  margin: 0 0 0.5em;
+}
+
+h2 {
+  font-size: 2.2rem;
+}
+
+p {
+  margin: 0 0 1em;
+  color: var(--moonlit);
+}
+
+/* Hero */
+
+.wordmark {
+  font-size: clamp(3.5rem, 9vw, 6.5rem);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--starlight);
+  margin-bottom: 0.1em;
+}
+
+.tagline {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  color: var(--star-gold);
+  margin-bottom: 1em;
+}
+
+.hero-sub {
+  max-width: 52ch;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin: 28px 0 18px;
+  flex-wrap: wrap;
+}
+
+.button-primary {
+  display: inline-block;
+  background: var(--star-gold);
+  color: var(--deep-sky);
+  font-weight: 500;
+  padding: 12px 22px;
+  border-radius: 4px;
+}
+
+.button-primary:hover {
+  background: var(--starlight);
+  color: var(--deep-sky);
+}
+
+.button-ghost {
+  display: inline-block;
+  padding: 12px 18px;
+  border: 1px solid var(--horizon);
+  border-radius: 4px;
+  color: var(--moonlit);
+}
+
+.button-ghost:hover {
+  border-color: var(--trail-blue);
+  color: var(--starlight);
+}
+
+.hero-platforms {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--moonlit);
+}
+
+/* Brightness stages */
+
+.stage-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 28px;
+  flex-wrap: wrap;
+  margin: 32px 0;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.stage-star {
+  display: inline-block;
+  border-radius: 50%;
+  background: var(--star-gold);
+  box-shadow: 0 0 12px 2px rgba(232, 201, 160, 0.35);
+}
+
+.stage-name {
+  font-size: 0.85rem;
+  color: var(--starlight);
+}
+
+.stage-visits {
+  font-size: 0.8rem;
+  color: var(--moonlit);
+}
+
+/* Lines fragment */
+
+.fragment {
+  display: block;
+  margin: 24px 0 8px;
+}
+
+.fragment-line {
+  stroke: var(--trail-blue);
+  stroke-width: 1;
+  opacity: 0.6;
+}
+
+.fragment-star {
+  fill: var(--starlight);
+}
+
+/* Download */
+
+.dl-primary,
+.dl-all {
+  border: 1px solid var(--horizon);
+  border-radius: 6px;
+  background: rgba(27, 38, 54, 0.55);
+  padding: 8px 0;
+  margin: 20px 0;
+}
+
+.dl-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 18px;
+  color: var(--starlight);
+}
+
+a.dl-row:hover {
+  background: rgba(90, 155, 196, 0.08);
+}
+
+.dl-label {
+  font-weight: 500;
+}
+
+.dl-detail {
+  margin-left: auto;
+  font-size: 0.88rem;
+  color: var(--moonlit);
+}
+
+.dl-tba {
+  opacity: 0.6;
+}
+
+.dl-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.92rem;
+  color: var(--trail-blue);
+  cursor: pointer;
+}
+
+.dl-toggle:hover {
+  color: var(--starlight);
+}
+
+.dl-all h3 {
+  font-size: 1.1rem;
+  margin: 16px 18px 4px;
+}
+
+.dl-note {
+  font-size: 0.88rem;
+  margin: 4px 18px 8px;
+}
+
+.dl-fallback {
+  font-size: 0.9rem;
+}
+
+.dl-mark {
+  color: var(--moonlit);
+  font-size: 0.9rem;
+  width: 18px;
+  text-align: center;
+}
+
+/* Footer */
+
+.footer {
+  position: relative;
+  z-index: 2;
+  background: var(--horizon);
+  padding: 28px 24px;
+  margin-top: 20vh;
+}
+
+.footer-line {
+  max-width: 62ch;
+  margin: 0 auto;
+  font-size: 0.92rem;
+}
+
+/* Mobile: the zigzag becomes a straight left spine with full-width
+   blocks, and the ConstellationPath vertices follow the same spine */
+
+@media (max-width: 720px) {
+  .block-left,
+  .block-right,
+  .block-center {
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
+  }
+
+  .hero {
+    padding: 0 20px;
+  }
+
+  .hero-platforms {
+    flex-wrap: wrap;
+  }
+
+  .stage-row {
+    gap: 18px;
+  }
+
+  .dl-row {
+    flex-wrap: wrap;
+  }
+
+  .dl-detail {
+    margin-left: 0;
+    width: 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
