@@ -385,10 +385,15 @@ a.dl-row:hover {
     margin-left: 0;
     margin-right: 0;
     max-width: 100%;
+    padding-left: 48px;
   }
 
   .hero {
-    padding: 0 20px;
+    padding: 0 20px 0 48px;
+  }
+
+  .footer {
+    padding-left: 48px;
   }
 
   .hero-platforms {

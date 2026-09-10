@@ -32,6 +32,7 @@ export default function SkyCanvas() {
     let height = 0
     let dpr = 1
     let last = 0
+    let lastWidth = 0
     const drift = [0, 0, 0]
     const mouse = { x: 0, y: 0, tx: 0, ty: 0 }
 
@@ -98,7 +99,13 @@ export default function SkyCanvas() {
       height = window.innerHeight
       el.width = Math.floor(width * dpr)
       el.height = Math.floor(height * dpr)
-      makeStars()
+      // Star positions are fractions of the canvas, so a height-only resize
+      // (mobile url bar hiding) just re-renders; reseed on width change to
+      // keep the density right
+      if (width !== lastWidth) {
+        lastWidth = width
+        makeStars()
+      }
       if (reduced) draw(0, 0)
     }
 

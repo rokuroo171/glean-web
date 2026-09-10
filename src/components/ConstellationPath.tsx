@@ -14,13 +14,24 @@ const SECTION_IDS = [
   'footer',
 ]
 
-// Vertex x as a fraction of viewport width. Sections alternate left and
-// right of center, so the line weaves between them; mobile becomes a
-// straight spine at a fixed left offset
-const XFRACTIONS = [0.5, 0.34, 0.66, 0.34, 0.66, 0.34, 0.66, 0.5, 0.5]
-const SPINE_X = 28
+// Vertex x comes from each block's own box, so the line frames the text
+// instead of crossing it: outer edge for side blocks, center for full-width
+// ones. Mobile becomes a straight spine at a fixed left offset
+const SIDE: Record<string, 'left' | 'right' | 'center'> = {
+  hero: 'center',
+  'the-idea': 'left',
+  brightness: 'right',
+  lines: 'left',
+  'living-sky': 'right',
+  editor: 'left',
+  'your-files': 'right',
+  download: 'center',
+  footer: 'center',
+}
+const SPINE_X = 20
+const EDGE_GAP = 40
 
-type Vertex = { x: number; y: number }
+type Vertex = { id: string; x: number; y: number }
 
 export default function ConstellationPath() {
   const [docSize, setDocSize] = useState({ w: 0, h: 0 })
@@ -38,13 +49,17 @@ export default function ConstellationPath() {
       const h = doc.scrollHeight
       const spine = spineQuery.matches
       const next: Vertex[] = []
-      SECTION_IDS.forEach((id, i) => {
+      SECTION_IDS.forEach((id) => {
         const el = document.getElementById(id)
         if (!el) return
         const rect = el.getBoundingClientRect()
-        const x = spine ? SPINE_X : XFRACTIONS[i] * w
+        const side = SIDE[id] ?? 'center'
+        let x = ((rect.left + rect.right) / 2 + window.scrollX) | 0
+        if (side === 'left') x = (rect.left + window.scrollX - EDGE_GAP) | 0
+        if (side === 'right') x = (rect.right + window.scrollX + EDGE_GAP) | 0
+        if (spine) x = SPINE_X
         const y = rect.top + window.scrollY + rect.height / 2
-        next.push({ x, y })
+        next.push({ id, x, y })
       })
       setDocSize({ w, h })
       setVertices(next)
@@ -114,10 +129,10 @@ export default function ConstellationPath() {
       {staticLine && <path d={d} className="constellation-draw" />}
       {vertices.map((v, i) => (
         <circle
-          key={SECTION_IDS[i]}
+          key={v.id}
           cx={v.x}
           cy={v.y}
-          r={i === 0 || i === vertices.length - 1 ? 4.5 : 3.5}
+          r={v.id === 'hero' || v.id === 'footer' ? 4.5 : 3.5}
           className={cum[i] <= drawn || staticLine ? 'vertex reached' : 'vertex'}
         />
       ))}
