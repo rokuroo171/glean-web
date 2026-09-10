@@ -47,6 +47,16 @@ code {
   color: var(--starlight);
 }
 
+/* Kill the mobile tap flash on blue links and buttons */
+.dl-toggle,
+.dl-options-link,
+.dl-row,
+.hero-dl,
+.button-primary,
+.button-ghost {
+  -webkit-tap-highlight-color: transparent;
+}
+
 :focus-visible {
   outline: 2px solid var(--trail-blue);
   outline-offset: 3px;
@@ -352,6 +362,19 @@ a.dl-row:hover {
   font-size: 0.92rem;
   color: var(--trail-blue);
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dl-chevron {
+  transition: transform 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dl-chevron {
+    transition: none;
+  }
 }
 
 .dl-toggle:hover {
