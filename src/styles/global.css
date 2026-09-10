@@ -150,6 +150,12 @@ p {
 
 /* Hero */
 
+.hero-icon {
+  width: 76px;
+  height: 76px;
+  margin-bottom: 20px;
+}
+
 .wordmark {
   font-size: clamp(3.5rem, 9vw, 6.5rem);
   font-weight: 500;

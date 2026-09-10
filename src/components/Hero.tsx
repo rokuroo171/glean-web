@@ -1,3 +1,4 @@
+import gleanIcon from '../assets/glean-icon.png'
 import PlatformMark from './PlatformMark'
 import { detectPlatform } from '../lib/platform'
 
@@ -17,6 +18,7 @@ export default function Hero() {
 
   return (
     <section id="hero" className="hero">
+      <img className="hero-icon" src={gleanIcon} alt="" width={76} height={76} />
       <h1 className="wordmark">glean</h1>
       <p className="tagline">Every note you keep is a star in your sky.</p>
       <p className="hero-sub">
