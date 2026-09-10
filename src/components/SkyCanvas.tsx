@@ -11,10 +11,84 @@ type Star = {
   gold: boolean
 }
 
-// Layer 0 is the deepest, slowest layer; layer 2 sits closest and
-// moves most. Drift is in px per second, parallax in px of cursor travel
+type Meteor = {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  speed: number
+  life: number
+  maxLife: number
+  length: number
+}
+
+type Comet = {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  speed: number
+  life: number
+  maxLife: number
+  tailLength: number
+}
+
+// Layer 0 is the deepest, slowest layer; layer 2 sits closest and moves
+// most. Drift is px per second, cursor parallax is px of pointer travel,
+// scroll parallax is a fraction of scrollY so the sky turns as the page
+// scrolls under it
 const DRIFT = [0.5, 1.0, 1.6]
 const PARALLAX = [3, 7, 12]
+const SCROLL_PARALLAX = [0.04, 0.09, 0.16]
+
+// Shower weeks lift the meteor rate, same calendar as glean's
+// Constellation.jsx: Quadrantids, Lyrids, Perseids, Orionids, Leonids,
+// Geminids
+function meteorBoost(): number {
+  const d = new Date()
+  const month = d.getMonth()
+  const dom = d.getDate()
+  if (month === 0 && dom >= 1 && dom <= 5) return 4
+  if (month === 3 && dom >= 21 && dom <= 23) return 3
+  if (month === 7 && dom >= 9 && dom <= 13) return 4
+  if (month === 9 && dom >= 20 && dom <= 22) return 3
+  if (month === 10 && dom >= 16 && dom <= 18) return 3
+  if (month === 11 && dom >= 4 && dom <= 17) return 4
+  return 1
+}
+
+// Spawn numbers match glean's spawnMeteor and spawnComet
+function spawnMeteor(w: number, h: number): Meteor {
+  const fromTop = Math.random() < 0.5
+  const vx = 300 + Math.random() * 300
+  const vy = 200 + Math.random() * 200
+  return {
+    x: fromTop ? Math.random() * w : -50,
+    y: fromTop ? -50 : Math.random() * h,
+    vx,
+    vy,
+    speed: Math.hypot(vx, vy),
+    life: 0,
+    maxLife: 0.8 + Math.random() * 0.6,
+    length: 60 + Math.random() * 80,
+  }
+}
+
+function spawnComet(w: number, h: number): Comet {
+  const fromTop = Math.random() < 0.5
+  const vx = 100 + Math.random() * 100
+  const vy = 60 + Math.random() * 80
+  return {
+    x: fromTop ? Math.random() * w * 0.75 : -80,
+    y: fromTop ? -80 : Math.random() * h * 0.75,
+    vx,
+    vy,
+    speed: Math.hypot(vx, vy),
+    life: 0,
+    maxLife: 3 + Math.random() * 2,
+    tailLength: 120 + Math.random() * 100,
+  }
+}
 
 export default function SkyCanvas() {
   const ref = useRef<HTMLCanvasElement>(null)
@@ -27,6 +101,8 @@ export default function SkyCanvas() {
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     let stars: Star[] = []
+    let meteors: Meteor[] = []
+    let comets: Comet[] = []
     let raf = 0
     let width = 0
     let height = 0
@@ -60,6 +136,47 @@ export default function SkyCanvas() {
       }
     }
 
+    const drawMeteor = (m: Meteor) => {
+      const p = m.life / m.maxLife
+      const opacity = p < 0.3 ? p / 0.3 : 1 - (p - 0.3) / 0.7
+      const dx = m.vx / m.speed
+      const dy = m.vy / m.speed
+      g.strokeStyle = '#e0d0a0'
+      g.lineWidth = 2
+      g.shadowColor = '#ffcc66'
+      g.shadowBlur = 8
+      g.globalAlpha = Math.max(0, opacity) * 0.8
+      g.beginPath()
+      g.moveTo(m.x - dx * m.length, m.y - dy * m.length)
+      g.lineTo(m.x, m.y)
+      g.stroke()
+      g.shadowBlur = 0
+      g.globalAlpha = 1
+    }
+
+    const drawComet = (c: Comet) => {
+      const p = c.life / c.maxLife
+      const opacity = p < 0.15 ? p / 0.15 : p > 0.85 ? (1 - p) / 0.15 : 1
+      const dx = c.vx / c.speed
+      const dy = c.vy / c.speed
+      const seg = c.tailLength / 6
+      for (let i = 1; i <= 6; i++) {
+        g.strokeStyle = '#e8e0d0'
+        g.lineWidth = 2.4 - i * 0.32
+        g.globalAlpha = Math.max(0, opacity) * (1 - i / 6)
+        g.beginPath()
+        g.moveTo(c.x - dx * (i - 1) * seg, c.y - dy * (i - 1) * seg)
+        g.lineTo(c.x - dx * i * seg, c.y - dy * i * seg)
+        g.stroke()
+      }
+      g.fillStyle = '#e8e0d0'
+      g.globalAlpha = Math.max(0, opacity)
+      g.beginPath()
+      g.arc(c.x, c.y, 3, 0, Math.PI * 2)
+      g.fill()
+      g.globalAlpha = 1
+    }
+
     const draw = (now: number, dt: number) => {
       g.setTransform(dpr, 0, 0, dpr, 0, 0)
       g.clearRect(0, 0, width, height)
@@ -67,11 +184,14 @@ export default function SkyCanvas() {
 
       mouse.x += (mouse.tx - mouse.x) * 0.04
       mouse.y += (mouse.ty - mouse.y) * 0.04
+      const scroll = window.scrollY
 
       for (const s of stars) {
         const twinkle = s.base + 0.22 * Math.sin(s.phase + (now / 1000) * s.speed)
         const px = wrap(s.x * width + drift[s.layer], width) + mouse.x * PARALLAX[s.layer]
-        const py = wrap(s.y * height + drift[s.layer] * 0.6, height) + mouse.y * PARALLAX[s.layer]
+        const py =
+          wrap(s.y * height - scroll * SCROLL_PARALLAX[s.layer] + drift[s.layer] * 0.6, height) +
+          mouse.y * PARALLAX[s.layer]
 
         g.beginPath()
         g.fillStyle = `rgba(${starColor(s.gold)}, ${Math.max(0, twinkle).toFixed(3)})`
@@ -91,6 +211,18 @@ export default function SkyCanvas() {
           g.stroke()
         }
       }
+
+      if (reduced) return
+
+      meteors = meteors
+        .map((m) => ({ ...m, x: m.x + m.vx * dt, y: m.y + m.vy * dt, life: m.life + dt }))
+        .filter((m) => m.life < m.maxLife)
+      comets = comets
+        .map((c) => ({ ...c, x: c.x + c.vx * dt, y: c.y + c.vy * dt, life: c.life + dt }))
+        .filter((c) => c.life < c.maxLife)
+
+      for (const m of meteors) drawMeteor(m)
+      for (const c of comets) drawComet(c)
     }
 
     const resize = () => {
@@ -128,13 +260,33 @@ export default function SkyCanvas() {
 
     resize()
     window.addEventListener('resize', resize)
+
+    // Spawn cadence matches glean: meteors every 6 to 24 seconds divided by
+    // the shower boost, comets every 25 to 70 seconds
+    let meteorTimer = 0
+    let cometTimer = 0
+    const scheduleMeteor = () => {
+      meteorTimer = window.setTimeout(() => {
+        meteors = [...meteors, spawnMeteor(width, height)]
+        scheduleMeteor()
+      }, (6000 + Math.random() * 18000) / meteorBoost())
+    }
+    const scheduleComet = () => {
+      cometTimer = window.setTimeout(() => {
+        comets = [...comets, spawnComet(width, height)]
+        scheduleComet()
+      }, 25000 + Math.random() * 45000)
+    }
+
     if (reduced) {
-      // Static field: one frame, no loop, no cursor tracking
+      // Static field: one frame, no loop, no cursor tracking, no visitors
       draw(0, 0)
     } else {
       raf = requestAnimationFrame(loop)
       window.addEventListener('mousemove', onMouse)
       document.documentElement.addEventListener('mouseleave', onMouseLeave)
+      scheduleMeteor()
+      scheduleComet()
     }
 
     return () => {
@@ -142,6 +294,8 @@ export default function SkyCanvas() {
       window.removeEventListener('resize', resize)
       window.removeEventListener('mousemove', onMouse)
       document.documentElement.removeEventListener('mouseleave', onMouseLeave)
+      clearTimeout(meteorTimer)
+      clearTimeout(cometTimer)
     }
   }, [])
 
