@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import gleanIcon from '../assets/glean-icon.png'
 import PlatformMark from './PlatformMark'
 import { detectPlatform } from '../lib/platform'
 
@@ -87,10 +88,11 @@ export default function Download() {
   return (
     <section id="download" className="block block-center">
       <h2>Download</h2>
-      <p>
-        glean is free and open source under GPL-3.0. The current release is v1.5.0, and v2.0.0
-        is in development.
+      <p className="dl-badge">
+        <img src={gleanIcon} alt="" width={22} height={22} />
+        <span>glean v1.5.0, free and open source under GPL-3.0</span>
       </p>
+      <p>v2.0.0 is in development.</p>
 
       {detected !== 'other' && (
         <div className="dl-primary">

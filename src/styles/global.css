@@ -185,12 +185,18 @@ p {
 }
 
 .button-primary {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   background: var(--star-gold);
   color: var(--deep-sky);
   font-weight: 500;
   padding: 12px 22px;
   border-radius: 4px;
+}
+
+.button-primary img {
+  display: block;
 }
 
 .button-primary:hover {
@@ -271,6 +277,17 @@ p {
 }
 
 /* Download */
+
+.dl-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.92rem;
+}
+
+.dl-badge img {
+  display: block;
+}
 
 .dl-primary,
 .dl-all {

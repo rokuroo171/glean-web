@@ -28,6 +28,7 @@ export default function Hero() {
       </p>
       <div className="hero-actions">
         <a className="button-primary" href={cta.href}>
+          <img src={gleanIcon} alt="" width={18} height={18} />
           {cta.label}
         </a>
         <a className="button-ghost" href="https://github.com/rokuroo171/glean">
