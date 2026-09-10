@@ -10,7 +10,11 @@ type Star = {
   speed: number
   base: number
   gold: boolean
+  wished: boolean
+  pulse: number
 }
+
+type Pulse = { x: number; y: number; r: number; life: number }
 
 type Meteor = {
   x: number
@@ -88,6 +92,7 @@ export default function SkyCanvas() {
     let stars: Star[] = []
     let meteors: Meteor[] = []
     let comets: Comet[] = []
+    let pulses: Pulse[] = []
     let raf = 0
     let width = 0
     let height = 0
@@ -119,6 +124,8 @@ export default function SkyCanvas() {
           speed: 0.1 + Math.random() * 0.3,
           base: 0.25 + bright * 0.55,
           gold: Math.random() < 0.05,
+          wished: false,
+          pulse: 0,
         })
       }
     }
@@ -168,20 +175,26 @@ export default function SkyCanvas() {
       g.setTransform(dpr, 0, 0, dpr, 0, 0)
       g.clearRect(0, 0, width, height)
       for (let l = 0; l < 3; l++) drift[l] += DRIFT[l] * dt
+      pulses = pulses.filter((p) => (p.life += dt) < 1.4)
 
       mouse.x += (mouse.tx - mouse.x) * 0.04
       mouse.y += (mouse.ty - mouse.y) * 0.04
       const scroll = window.scrollY
 
       for (const s of stars) {
-        const twinkle = s.base + 0.22 * Math.sin(s.phase + (now / 1000) * s.speed)
+        if (s.pulse > 0) s.pulse = Math.max(0, s.pulse - dt * 1.2)
+        const lift = s.wished ? 0.28 + s.pulse * 0.4 : 0
+        const twinkle = Math.min(
+          1,
+          s.base + lift + 0.22 * Math.sin(s.phase + (now / 1000) * s.speed),
+        )
         const px = wrap(s.x + drift[s.layer], width) + mouse.x * PARALLAX[s.layer]
         const py =
           wrap(s.y - scroll * SCROLL_PARALLAX[s.layer] + drift[s.layer] * 0.6, height) +
           mouse.y * PARALLAX[s.layer]
 
         g.beginPath()
-        g.fillStyle = `rgba(${starColor(s.gold)}, ${Math.max(0, twinkle).toFixed(3)})`
+        g.fillStyle = `rgba(${starColor(s.gold || s.wished)}, ${Math.max(0, twinkle).toFixed(3)})`
         g.arc(px, py, s.r, 0, Math.PI * 2)
         g.fill()
 
@@ -210,6 +223,15 @@ export default function SkyCanvas() {
 
       for (const m of meteors) drawMeteor(m)
       for (const c of comets) drawComet(c)
+
+      for (const p of pulses) {
+        const t = p.life / 1.4
+        g.strokeStyle = `rgba(232, 201, 160, ${(1 - t) * 0.7})`
+        g.lineWidth = 1
+        g.beginPath()
+        g.arc(p.x, p.y, p.r + t * 34, 0, Math.PI * 2)
+        g.stroke()
+      }
     }
 
     const resize = () => {
@@ -239,8 +261,34 @@ export default function SkyCanvas() {
       mouse.ty = (e.clientY / window.innerHeight) * 2 - 1
     }
 
+    // Wish a star: clicking near a star lifts its brightness for good and
+    // sends out one expanding ring, the way wishes work in glean
+    const onClick = (e: MouseEvent) => {
+      // Only bare sky counts: clicks on text, links, and buttons pass through
+      const t = e.target as HTMLElement | null
+      if (t && t.closest('a, button, p, h1, h2, h3, h4, code, img, svg, section')) return
+      let best: Star | null = null
+      let bestDist = 18
+      for (const s of stars) {
+        const sx = wrap(s.x + drift[s.layer], width) + mouse.x * PARALLAX[s.layer]
+        const sy =
+          wrap(s.y - window.scrollY * SCROLL_PARALLAX[s.layer] + drift[s.layer] * 0.6, height) +
+          mouse.y * PARALLAX[s.layer]
+        const dist = Math.hypot(e.clientX - sx, e.clientY - sy)
+        if (dist < bestDist) {
+          best = s
+          bestDist = dist
+        }
+      }
+      if (!best) return
+      best.wished = true
+      best.pulse = 1
+      pulses = [...pulses, { x: e.clientX, y: e.clientY, r: best.r, life: 0 }]
+    }
+
     resize()
     window.addEventListener('resize', resize)
+    el.parentElement?.addEventListener('click', onClick)
 
     // Spawn cadence matches glean: meteors every 6 to 24 seconds divided by
     // the shower boost, comets every 25 to 70 seconds
@@ -273,6 +321,7 @@ export default function SkyCanvas() {
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', resize)
       window.removeEventListener('mousemove', onMouse)
+      el.parentElement?.removeEventListener('click', onClick)
       clearTimeout(meteorTimer)
       clearTimeout(cometTimer)
     }
