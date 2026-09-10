@@ -19,6 +19,18 @@ npm run build
 
 Output lands in `dist/`. Check a production build locally with `npm run preview`.
 
+## Deploy
+
+Static output, no server config needed. Vercel picks up `dist/404.html` automatically, and the same file works by convention on GitHub Pages, Netlify, and nginx (`error_page 404 /404.html;`).
+
+After each deploy, confirm the live og image is the 1200x630 banner and not an older icon:
+
+```bash
+curl -s https://glean-note.vercel.app/og-image.png | file -
+```
+
+That should print `PNG image data, 1200 x 630`. If a share preview ever shows stale title or image text, run the URL once through the Facebook sharing debugger; WhatsApp follows Facebook's cache and ignores updates until forced to re-scrape.
+
 ## Layout
 
 - `src/components`: one component per page section, in page order
