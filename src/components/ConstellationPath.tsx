@@ -15,18 +15,19 @@ const SECTION_IDS = [
 ]
 
 // Vertex x comes from each block's own box, so the line frames the text
-// instead of crossing it: outer edge for side blocks, center for full-width
-// ones. Mobile becomes a straight spine at a fixed left offset
-const SIDE: Record<string, 'left' | 'right' | 'center'> = {
-  hero: 'center',
+// instead of crossing it: outer edge for side blocks and centered columns
+// alike, and the footer vertex floats in the sky just above the footer
+// band. Mobile becomes a straight spine at a fixed left offset
+const SIDE: Record<string, 'left' | 'right' | 'top'> = {
+  hero: 'left',
   'the-idea': 'left',
   brightness: 'right',
   lines: 'left',
   'living-sky': 'right',
   editor: 'left',
   'your-files': 'right',
-  download: 'center',
-  footer: 'center',
+  download: 'left',
+  footer: 'top',
 }
 const SPINE_X = 20
 const EDGE_GAP = 40
@@ -53,12 +54,19 @@ export default function ConstellationPath() {
         const el = document.getElementById(id)
         if (!el) return
         const rect = el.getBoundingClientRect()
-        const side = SIDE[id] ?? 'center'
-        let x = ((rect.left + rect.right) / 2 + window.scrollX) | 0
-        if (side === 'left') x = (rect.left + window.scrollX - EDGE_GAP) | 0
-        if (side === 'right') x = (rect.right + window.scrollX + EDGE_GAP) | 0
+        const side = SIDE[id] ?? 'left'
+        const boxLeft = rect.left + window.scrollX
+        const boxRight = rect.right + window.scrollX
+        let x: number
+        let y: number
+        if (side === 'top') {
+          x = boxLeft + rect.width / 2
+          y = rect.top + window.scrollY - 30
+        } else {
+          y = rect.top + window.scrollY + rect.height / 2
+          x = side === 'left' ? boxLeft - EDGE_GAP : boxRight + EDGE_GAP
+        }
         if (spine) x = SPINE_X
-        const y = rect.top + window.scrollY + rect.height / 2
         next.push({ id, x, y })
       })
       setDocSize({ w, h })
