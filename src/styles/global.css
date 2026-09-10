@@ -42,6 +42,11 @@ code {
   color: var(--star-gold);
 }
 
+::selection {
+  background: rgba(232, 201, 160, 0.35);
+  color: var(--starlight);
+}
+
 :focus-visible {
   outline: 2px solid var(--trail-blue);
   outline-offset: 3px;
