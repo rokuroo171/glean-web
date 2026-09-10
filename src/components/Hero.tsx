@@ -6,6 +6,12 @@ import { detectPlatform } from '../lib/platform'
 // do not change. The releases page below is the fallback
 const LATEST = 'https://github.com/rokuroo171/glean/releases/latest/download'
 
+const platforms = [
+  { mark: 'windows', label: 'Windows', file: 'gleanInstaller.exe' },
+  { mark: 'linux', label: 'Linux', file: 'glean-desktop' },
+  { mark: 'apple', label: 'macOS', file: 'glean-arm64.app.zip' },
+] as const
+
 export default function Hero() {
   const platform = detectPlatform()
 
@@ -36,12 +42,12 @@ export default function Hero() {
         </a>
       </div>
       <p className="hero-platforms">
-        <PlatformMark name="windows" size={14} />
-        <span>Windows</span>
-        <PlatformMark name="linux" size={14} />
-        <span>Linux</span>
-        <PlatformMark name="apple" size={14} />
-        <span>macOS</span>
+        {platforms.map((p) => (
+          <a key={p.mark} className="hero-dl" href={`${LATEST}/${p.file}`}>
+            <PlatformMark name={p.mark} size={14} />
+            <span>{p.label}</span>
+          </a>
+        ))}
         <span>free and open source, GPL-3.0</span>
       </p>
     </section>

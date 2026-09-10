@@ -219,10 +219,24 @@ p {
 
 .hero-platforms {
   display: flex;
-  gap: 8px;
+  gap: 2px;
   align-items: center;
+  flex-wrap: wrap;
+  margin-left: -10px;
   font-size: 0.9rem;
   color: var(--moonlit);
+}
+
+.hero-dl {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--moonlit);
+  padding: 11px 10px;
+}
+
+.hero-dl:hover {
+  color: var(--starlight);
 }
 
 /* Brightness stages */
