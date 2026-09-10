@@ -359,6 +359,26 @@ a.dl-row:hover {
   text-align: center;
 }
 
+/* 404 */
+
+.nf {
+  min-height: 100vh;
+  max-width: 62ch;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.nf-sub {
+  max-width: 46ch;
+}
+
+.nf .button-ghost {
+  align-self: flex-start;
+}
+
 /* Footer */
 
 .footer {
