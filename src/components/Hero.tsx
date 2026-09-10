@@ -33,9 +33,13 @@ export default function Hero() {
         </a>
       </div>
       <p className="hero-platforms">
-        <PlatformMark name="windows" size={14} /> windows{' '}
-        <PlatformMark name="linux" size={14} /> linux <PlatformMark name="apple" size={14} /> mac
-        os, free and open source, GPL-3.0
+        <PlatformMark name="windows" size={14} />
+        <span>Windows</span>
+        <PlatformMark name="linux" size={14} />
+        <span>Linux</span>
+        <PlatformMark name="apple" size={14} />
+        <span>macOS</span>
+        <span>free and open source, GPL-3.0</span>
       </p>
     </section>
   )

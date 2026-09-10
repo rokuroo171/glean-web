@@ -18,10 +18,16 @@ const paths: Record<MarkName, { viewBox: string; d: string }> = {
   },
 }
 
+const labels: Record<MarkName, string> = {
+  windows: 'Windows',
+  apple: 'Apple',
+  linux: 'Linux',
+}
+
 export default function PlatformMark({ name, size = 20 }: { name: MarkName; size?: number }) {
   const mark = paths[name]
   return (
-    <svg role="img" aria-label={name} viewBox={mark.viewBox} width={size} height={size} fill="currentColor" aria-hidden={false}>
+    <svg role="img" aria-label={labels[name]} viewBox={mark.viewBox} width={size} height={size} fill="currentColor">
       <path d={mark.d} />
     </svg>
   )
