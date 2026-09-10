@@ -1,6 +1,7 @@
 import gleanIcon from '../assets/glean-icon.png'
 import PlatformMark from './PlatformMark'
 import { detectPlatform } from '../lib/platform'
+import { activeShower } from '../lib/showers'
 
 // GitHub keeps these URLs stable across releases as long as asset names
 // do not change
@@ -14,6 +15,7 @@ function showAllDownloads() {
 
 export default function Hero() {
   const platform = detectPlatform()
+  const shower = activeShower()
 
   const cta =
     platform === 'windows'
@@ -32,6 +34,11 @@ export default function Hero() {
         notes and a line forms. Nothing to set up, nothing to file: your sky accumulates as you
         write.
       </p>
+      {shower && (
+        <p className="shower-note">
+          The {shower} are peaking. The sky is busier than usual.
+        </p>
+      )}
       <div className="hero-actions">
         <a className="button-primary" href={cta.href}>
           <img src={gleanIcon} alt="" width={18} height={18} />

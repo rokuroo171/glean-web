@@ -148,12 +148,17 @@ p {
   color: var(--moonlit);
 }
 
-/* Hero */
-
 .hero-icon {
   width: 76px;
   height: 76px;
   margin-bottom: 20px;
+}
+
+.shower-note {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--star-gold);
+  font-size: 1.05rem;
 }
 
 .wordmark {

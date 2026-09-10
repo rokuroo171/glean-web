@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { meteorBoost } from '../lib/showers'
 
 type Star = {
   x: number
@@ -40,22 +41,6 @@ type Comet = {
 const DRIFT = [0.5, 1.0, 1.6]
 const PARALLAX = [3, 7, 12]
 const SCROLL_PARALLAX = [0.04, 0.09, 0.16]
-
-// Shower weeks lift the meteor rate, same calendar as glean's
-// Constellation.jsx: Quadrantids, Lyrids, Perseids, Orionids, Leonids,
-// Geminids
-function meteorBoost(): number {
-  const d = new Date()
-  const month = d.getMonth()
-  const dom = d.getDate()
-  if (month === 0 && dom >= 1 && dom <= 5) return 4
-  if (month === 3 && dom >= 21 && dom <= 23) return 3
-  if (month === 7 && dom >= 9 && dom <= 13) return 4
-  if (month === 9 && dom >= 20 && dom <= 22) return 3
-  if (month === 10 && dom >= 16 && dom <= 18) return 3
-  if (month === 11 && dom >= 4 && dom <= 17) return 4
-  return 1
-}
 
 // Spawn numbers match glean's spawnMeteor and spawnComet
 function spawnMeteor(w: number, h: number): Meteor {
@@ -124,8 +109,10 @@ export default function SkyCanvas() {
         const layer = i % 3
         const bright = Math.random()
         stars.push({
-          x: Math.random(),
-          y: Math.random(),
+          // Pixel positions, not fractions: a height-only resize (mobile
+          // url bar hiding mid-scroll) must not rescale every star's spot
+          x: Math.random() * width,
+          y: Math.random() * height,
           r: layer === 2 ? 0.9 + bright * 1.3 : 0.4 + bright * 0.7,
           layer,
           phase: Math.random() * Math.PI * 2,
@@ -188,9 +175,9 @@ export default function SkyCanvas() {
 
       for (const s of stars) {
         const twinkle = s.base + 0.22 * Math.sin(s.phase + (now / 1000) * s.speed)
-        const px = wrap(s.x * width + drift[s.layer], width) + mouse.x * PARALLAX[s.layer]
+        const px = wrap(s.x + drift[s.layer], width) + mouse.x * PARALLAX[s.layer]
         const py =
-          wrap(s.y * height - scroll * SCROLL_PARALLAX[s.layer] + drift[s.layer] * 0.6, height) +
+          wrap(s.y - scroll * SCROLL_PARALLAX[s.layer] + drift[s.layer] * 0.6, height) +
           mouse.y * PARALLAX[s.layer]
 
         g.beginPath()
@@ -231,9 +218,8 @@ export default function SkyCanvas() {
       height = window.innerHeight
       el.width = Math.floor(width * dpr)
       el.height = Math.floor(height * dpr)
-      // Star positions are fractions of the canvas, so a height-only resize
-      // (mobile url bar hiding) just re-renders; reseed on width change to
-      // keep the density right
+      // Stars live in pixels, so a height-only resize (mobile url bar) is a
+      // no-op for them; reseed on width change to keep the density right
       if (width !== lastWidth) {
         lastWidth = width
         makeStars()
@@ -251,11 +237,6 @@ export default function SkyCanvas() {
     const onMouse = (e: MouseEvent) => {
       mouse.tx = (e.clientX / window.innerWidth) * 2 - 1
       mouse.ty = (e.clientY / window.innerHeight) * 2 - 1
-    }
-
-    const onMouseLeave = () => {
-      mouse.tx = 0
-      mouse.ty = 0
     }
 
     resize()
@@ -284,7 +265,6 @@ export default function SkyCanvas() {
     } else {
       raf = requestAnimationFrame(loop)
       window.addEventListener('mousemove', onMouse)
-      document.documentElement.addEventListener('mouseleave', onMouseLeave)
       scheduleMeteor()
       scheduleComet()
     }
@@ -293,7 +273,6 @@ export default function SkyCanvas() {
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', resize)
       window.removeEventListener('mousemove', onMouse)
-      document.documentElement.removeEventListener('mouseleave', onMouseLeave)
       clearTimeout(meteorTimer)
       clearTimeout(cometTimer)
     }
