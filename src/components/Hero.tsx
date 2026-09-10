@@ -3,14 +3,14 @@ import PlatformMark from './PlatformMark'
 import { detectPlatform } from '../lib/platform'
 
 // GitHub keeps these URLs stable across releases as long as asset names
-// do not change. The releases page below is the fallback
+// do not change
 const LATEST = 'https://github.com/rokuroo171/glean/releases/latest/download'
 
-const platforms = [
-  { mark: 'windows', label: 'Windows', file: 'gleanInstaller.exe' },
-  { mark: 'linux', label: 'Linux', file: 'glean-desktop' },
-  { mark: 'apple', label: 'macOS', file: 'glean-arm64.app.zip' },
-] as const
+// The link asks the Download section to open its all-platforms list, then
+// the native anchor brings the visitor there
+function showAllDownloads() {
+  window.dispatchEvent(new Event('glean:show-all-downloads'))
+}
 
 export default function Hero() {
   const platform = detectPlatform()
@@ -41,13 +41,16 @@ export default function Hero() {
           View source
         </a>
       </div>
+      <a className="dl-options-link" href="#download" onClick={showAllDownloads}>
+        All download options
+      </a>
       <p className="hero-platforms">
-        {platforms.map((p) => (
-          <a key={p.mark} className="hero-dl" href={`${LATEST}/${p.file}`}>
-            <PlatformMark name={p.mark} size={14} />
-            <span>{p.label}</span>
-          </a>
-        ))}
+        <PlatformMark name="windows" size={14} />
+        <span>Windows</span>
+        <PlatformMark name="linux" size={14} />
+        <span>Linux</span>
+        <PlatformMark name="apple" size={14} />
+        <span>macOS</span>
         <span>free and open source, GPL-3.0</span>
       </p>
     </section>

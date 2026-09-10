@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import gleanIcon from '../assets/glean-icon.png'
 import PlatformMark from './PlatformMark'
 import { detectPlatform } from '../lib/platform'
@@ -84,6 +84,12 @@ function LinuxRows() {
 export default function Download() {
   const detected = detectPlatform()
   const [showAll, setShowAll] = useState(false)
+
+  useEffect(() => {
+    const open = () => setShowAll(true)
+    window.addEventListener('glean:show-all-downloads', open)
+    return () => window.removeEventListener('glean:show-all-downloads', open)
+  }, [])
 
   return (
     <section id="download" className="block block-center">
